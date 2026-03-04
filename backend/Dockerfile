@@ -1,0 +1,33 @@
+FROM python:3.12-slim
+
+# ── Install system dependencies ─────────────────────────────────────────────
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Set Python environment ───────────────────────────────────────────────────
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100
+
+WORKDIR /app
+
+# ── Pre-install core deps with timeouts ─────────────────────────────────────
+COPY requirements.txt .
+RUN pip install --no-cache-dir --timeout 1000 --retries 10 \
+    --trusted-host pypi.org \
+    --trusted-host pypi.python.org \
+    --trusted-host files.pythonhosted.org \
+    -r requirements.txt
+
+# ── Copy app ─────────────────────────────────────────────────────────────────
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
