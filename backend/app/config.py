@@ -14,8 +14,6 @@ class Settings(BaseSettings):
     # ── Server ────────────────────────────────────────────────────
     HOST: str = "0.0.0.0"
     PORT: int = 8000
-    # SQLite does not support concurrent writes.
-    # Keep workers=1 unless migrating to PostgreSQL.
     WORKERS: int = 1
 
     # ── Paths ─────────────────────────────────────────────────────
