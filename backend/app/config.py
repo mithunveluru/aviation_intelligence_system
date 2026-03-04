@@ -31,8 +31,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "mistral"
     OLLAMA_TIMEOUT: int = 120          # LLM calls are slow; be generous
-    GOOGLE_API_KEY: str = "AIzaSyB7wPF-hLbv2ZLHZBLXeqVvG18dFxDNFMU"
-    GROQ_API_KEY: str = "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"
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
     # ── ML Pipeline ───────────────────────────────────────────────
