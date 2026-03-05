@@ -29,4 +29,4 @@ RUN mkdir -p /app/data
 COPY data/aviation.db /app/data/aviation.db
 
 EXPOSE 8000
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
