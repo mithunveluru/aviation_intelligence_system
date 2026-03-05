@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:5173",   # Vite dev server
         "http://localhost:3000",
+        "https://aviation-intelligence-system.vercel.app/",
     ]
 
     model_config = SettingsConfigDict(
