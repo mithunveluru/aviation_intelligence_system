@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000,
       retry: 1,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false,  
     },
   },
 });
@@ -15,7 +15,7 @@ export const queryClient = new QueryClient({
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 export const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/api/v1`,
-  timeout: 15000,
+  timeout: 90000,
   headers: { 'Content-Type': 'application/json' },
 });
 
