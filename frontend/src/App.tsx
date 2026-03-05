@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import Layout    from './components/layout/Layout'
@@ -8,10 +9,22 @@ import Model     from './pages/Model'
 import Incidents from './pages/Incidents'
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 5 * 60 * 1000, retry: 1 } },
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 3,           
+      retryDelay: 5000,   
+    },
+  },
 })
 
 export default function App() {
+ 
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/`)
+      .catch(() => {})
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
