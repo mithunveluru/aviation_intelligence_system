@@ -89,5 +89,8 @@ def create_application() -> FastAPI:
 
     return app
 
-
 app = create_application()
+
+@app.get("/")
+def root():
+    return {"status": "Aviation Intelligence API running"}
