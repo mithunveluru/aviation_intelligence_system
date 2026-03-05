@@ -13,13 +13,15 @@ logger = logging.getLogger(__name__)
 _stat_svc = StatisticalService()
 
 
+_cached_df = None
 def _load_incidents_df() -> pd.DataFrame:
-    """
-    Load incidents directly via pandas — bypasses ORM overhead entirely.
-    SQLAlchemy engine is reused (connection pooling applies).
-    Typical load time: <50ms for 5K rows.
-    """
-    return pd.read_sql_table("incidents", engine)
+    global _cached_df
+
+    if _cached_df is None:
+        logger.info("Loading incidents table into memory")
+        _cached_df = pd.read_sql_table("incidents", engine)
+
+    return _cached_df
 
 
 @router.get(

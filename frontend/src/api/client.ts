@@ -1,6 +1,16 @@
 import axios from 'axios';
 import { QueryClient } from '@tanstack/react-query';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+
+console.log("API BASE =", API_BASE)
+
+export const api = axios.create({
+  baseURL: `${API_BASE}/api/v1`,
+  timeout: 90000,
+  headers: { 'Content-Type': 'application/json' },
+})
+
 // ─── React Query Client ───────────────────────────────────────────────────────
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,12 +22,6 @@ export const queryClient = new QueryClient({
   },
 });
 
-// ─── Axios Instance ───────────────────────────────────────────────────────────
-export const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL ?? 'http://localhost:8000'}/api/v1`,
-  timeout: 90000,
-  headers: { 'Content-Type': 'application/json' },
-});
 
 // ─── API Endpoint Builders ────────────────────────────────────────────────────
 export const endpoints = {
