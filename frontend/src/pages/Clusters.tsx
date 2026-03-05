@@ -92,7 +92,7 @@ export default function Clusters() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {clusters.map((c: any, i: number) => {
+        {clusters.filter((c: any) => c.cluster_label !== -1).map((c: any, i: number) => {
           // ✅ Map API fields → UI variables
           const color      = CLUSTER_COLORS[i % CLUSTER_COLORS.length]
           const yearRange  = `${c.yearRangeStart ?? '?'}–${c.yearRangeEnd ?? '?'}`

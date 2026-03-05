@@ -1,6 +1,8 @@
+
 from functools import lru_cache
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
 
 class Settings(BaseSettings):
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "mistral"
     OLLAMA_TIMEOUT: int = 120          # LLM calls are slow; be generous
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    GROQ_API_KEY: str = ""
 
 
     # ── ML Pipeline ───────────────────────────────────────────────

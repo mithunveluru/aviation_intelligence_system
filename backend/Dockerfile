@@ -17,8 +17,14 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# ── Pre-install core deps with timeouts ─────────────────────────────────────
+# ── Install dependencies ─────────────────────────────────────────────────────
 COPY requirements.txt .
+
+# 🔥 Force CPU-only torch BEFORE installing requirements
+RUN pip install --no-cache-dir \
+    torch --index-url https://download.pytorch.org/whl/cpu
+
+# Then install everything else normally
 RUN pip install --no-cache-dir --timeout 1000 --retries 10 \
     --trusted-host pypi.org \
     --trusted-host pypi.python.org \

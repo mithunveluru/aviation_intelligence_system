@@ -9,4 +9,7 @@ export default defineConfig({
       '/api': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000
+  },
 })
