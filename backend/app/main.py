@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi import Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -92,5 +93,6 @@ def create_application() -> FastAPI:
 app = create_application()
 
 @app.get("/")
+@app.head("/")
 def root():
     return {"status": "Aviation Intelligence API running"}
