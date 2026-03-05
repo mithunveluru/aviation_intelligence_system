@@ -1,5 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,10 +27,9 @@ class Settings(BaseSettings):
     LOGS_DIR: Path = Path("/app/logs")
 
     # ── Database ──────────────────────────────────────────────────
-    # ABSOLUTE path — relative paths break on Render
     DATABASE_URL: str = "sqlite:////app/data/aviation.db"
 
-    # ── LLM (Ollama) ──────────────────────────────────────────────
+    # ── LLM ───────────────────────────────────────────────────────
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "mistral"
     OLLAMA_TIMEOUT: int = 120
@@ -44,12 +45,32 @@ class Settings(BaseSettings):
 
     # ── CORS ──────────────────────────────────────────────────────
     ALLOWED_ORIGINS: list[str] = [
-        "*",                        # allow all — tighten after deployment works
+        "*",
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://aviation-intelligence-system.vercel.app",
-        "https://aviation-intelligence-system.onrender.com",
     ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_origins(cls, v: Any) -> list[str]:
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            # Handle plain wildcard or comma-separated
+            if v == "*":
+                return ["*"]
+            # Try JSON array first
+            try:
+                import json
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+            # Fall back to comma-separated
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return ["*"]
 
     model_config = SettingsConfigDict(
         env_file=".env",
