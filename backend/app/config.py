@@ -45,11 +45,7 @@ class Settings(BaseSettings):
     TEST_SIZE: float = 0.2
 
     # ── CORS ──────────────────────────────────────────────────────
-    ALLOWED_ORIGINS: list[str] = [
-        "http://localhost:5173",   # Vite dev server
-        "http://localhost:3000",
-        "https://aviation-intelligence-system.vercel.app/",
-    ]
+    ALLOWED_ORIGINS: list[str] = ["*"]
 
     model_config = SettingsConfigDict(
         env_file=".env",

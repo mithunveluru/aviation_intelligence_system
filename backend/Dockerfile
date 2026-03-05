@@ -1,10 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    build-essential \
-    curl \
+    gcc g++ build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONUNBUFFERED=1 \
@@ -29,4 +26,4 @@ RUN mkdir -p /app/data
 COPY data/aviation.db /app/data/aviation.db
 
 EXPOSE 10000
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --workers 1 --no-access-log
