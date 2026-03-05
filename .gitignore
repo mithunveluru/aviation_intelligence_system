@@ -7,7 +7,6 @@ venv/
 # Backend
 backend/venv/
 backend/logs/
-backend/data/
 backend/catboost_info/
 
 # Frontend
