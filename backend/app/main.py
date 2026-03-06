@@ -11,16 +11,6 @@ from app.core.logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
-from app.database import engine, Base
-from app.core.exceptions import (
-    AFISException,
-    afis_exception_handler,
-    validation_exception_handler,
-    unhandled_exception_handler,
-)
-from app.core.middleware import RequestLoggingMiddleware
-from app.api.v1.router import api_router
-
 
 def _bootstrap_directories() -> None:
     for directory in [
@@ -34,6 +24,7 @@ def _bootstrap_directories() -> None:
 
 
 def _bootstrap_database() -> None:
+    from app.database import engine, Base
     import app.models
     Base.metadata.create_all(bind=engine)
     logger.info("Database schema synchronized.")
@@ -45,10 +36,8 @@ async def lifespan(app: FastAPI):
         f"┌─ Starting {settings.APP_NAME} v{settings.APP_VERSION} "
         f"[{settings.ENVIRONMENT}] ─────────────────────────────"
     )
-
     _bootstrap_directories()
     _bootstrap_database()
-
     logger.info("└─ Startup complete. API ready.")
     yield
     logger.info("Application shutdown initiated.")
@@ -71,21 +60,31 @@ def create_application() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["X-Request-ID", "X-Process-Time"],
     )
 
+    # ── Import heavy routers INSIDE create_application ────────────────────────
+    # Keeps torch/sentence-transformers from loading at module import time,
+    # which caused "No open ports detected" on Render free tier.
+    from app.core.exceptions import (
+        AFISException,
+        afis_exception_handler,
+        validation_exception_handler,
+        unhandled_exception_handler,
+    )
+    from app.core.middleware import RequestLoggingMiddleware
+    from app.api.v1.router import api_router
+
     app.add_middleware(RequestLoggingMiddleware)
 
-    # Exception handlers
     app.add_exception_handler(AFISException, afis_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
 
-    # Routes
     app.include_router(api_router, prefix=settings.API_PREFIX)
 
     return app
