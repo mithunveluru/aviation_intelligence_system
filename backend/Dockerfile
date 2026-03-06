@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir --timeout 1000 --retries 10 \
     --trusted-host files.pythonhosted.org \
     -r requirements.txt
 
+ARG CACHE_BUST=1
 COPY . .
 RUN mkdir -p /app/data
 COPY data/aviation.db /app/data/aviation.db

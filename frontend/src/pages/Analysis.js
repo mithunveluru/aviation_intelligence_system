@@ -39,7 +39,7 @@ function LoadingSkeleton() {
 }
 // ─── Error State ──────────────────────────────────────────────────────────────
 function ErrorState() {
-    return (_jsxs("div", { className: "flex flex-col items-center justify-center h-64 gap-3", children: [_jsx(AlertTriangle, { className: "text-red-400", size: 32 }), _jsxs("p", { className: "text-slate-400 text-sm", children: ["Failed to load analysis data. Is the backend running on", ' ', _jsx("code", { className: "text-cyan-400", children: "localhost:8000" }), "?"] }), _jsx("button", { onClick: () => window.location.reload(), className: "text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors", children: "Retry" })] }));
+    return (_jsxs("div", { className: "flex flex-col items-center justify-center h-64 gap-3", children: [_jsx(AlertTriangle, { className: "text-red-400", size: 32 }), _jsxs("p", { className: "text-slate-400 text-sm", children: ["Failed to load analysis data. Is the backend running on", ' ', _jsx("code", { className: "text-cyan-400", children: "localhost:    " }), "?"] }), _jsx("button", { onClick: () => window.location.reload(), className: "text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors", children: "Retry" })] }));
 }
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Analysis() {
