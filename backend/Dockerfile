@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir \
     torch --index-url https://download.pytorch.org/whl/cpu
@@ -21,10 +22,11 @@ RUN pip install --no-cache-dir --timeout 1000 --retries 10 \
     --trusted-host files.pythonhosted.org \
     -r requirements.txt
 
-ARG CACHE_BUST=1
-COPY . .
+
 RUN mkdir -p /app/data
 COPY data/aviation.db /app/data/aviation.db
+
+COPY . .
 
 EXPOSE 10000
 CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000} --workers 1 --no-access-log
