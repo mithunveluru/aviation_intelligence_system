@@ -31,13 +31,13 @@ def get_overview(db: Session = Depends(get_db)):
             COUNT(DISTINCT operator)                                      AS unique_operators,
             COUNT(DISTINCT aircraft_type)                                 AS unique_aircraft_types
         FROM incidents
-        WHERE aboard IS NOT NULL AND aboard > 0
+        WHERE fatalities IS NOT NULL AND aboard > 0
     """)[0]
     return APIResponse(data={
         "total_incidents":       row[0] or 0,
         "total_fatalities":      int(row[1] or 0),
         "total_aboard":          int(row[2] or 0),
-        "overall_fatality_rate": row[3] or 0,
+        "overall_fatality_rate": round(float(row[3] or 0) * 100, 2),
         "year_min":              row[4],
         "year_max":              row[5],
         "unique_operators":      row[6] or 0,
@@ -53,7 +53,7 @@ def get_yearly_trends(db: Session = Depends(get_db)):
             year,
             COUNT(*)                                                     AS incidents,
             CAST(SUM(fatalities) AS INTEGER)                                    AS fatalities,
-            ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
+            ROUND(CAST(SUM(fatalities) AS REAL) / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
             ROUND(SUM(aboard), 1)                                        AS total_aboard
         FROM incidents
         WHERE year IS NOT NULL
@@ -88,7 +88,7 @@ def get_decade_stats(db: Session = Depends(get_db)):
             COUNT(*)                                                     AS incidents,
             ROUND(SUM(fatalities), 1)                                    AS fatalities,
             ROUND(AVG(fatalities), 2)                                    AS avg_fatalities,
-            ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
+            ROUND(CAST(SUM(fatalities) AS REAL) / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
         FROM incidents
         WHERE year IS NOT NULL
         GROUP BY decade
@@ -117,7 +117,7 @@ def get_operator_stats(
             operator,
             COUNT(*)                                                     AS incidents,
             ROUND(SUM(fatalities), 1)                                    AS fatalities,
-            ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
+            ROUND(CAST(SUM(fatalities) AS REAL) / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
             ROUND(AVG(fatalities), 2)                                    AS avg_fatalities_per_incident
         FROM incidents
         WHERE operator IS NOT NULL AND operator != ''
@@ -148,7 +148,7 @@ def get_aircraft_stats(
             aircraft_type,
             COUNT(*)                                                     AS incidents,
             ROUND(SUM(fatalities), 1)                                    AS fatalities,
-            ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
+            ROUND(CAST(SUM(fatalities) AS REAL) / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
         FROM incidents
         WHERE aircraft_type IS NOT NULL AND aircraft_type != ''
         GROUP BY aircraft_type
