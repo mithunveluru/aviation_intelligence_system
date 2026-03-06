@@ -25,7 +25,11 @@ def get_overview(db: Session = Depends(get_db)):
             COUNT(*)                                                      AS total_incidents,
             CAST(SUM(fatalities) AS INTEGER)                                 AS total_fatalities,
             ROUND(SUM(aboard), 1)                                         AS total_aboard,
-            CAST(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0) AS INTEGER  )     AS overall_fatality_rate,
+            ROUND(
+                SUM(CAST(fatalities AS REAL)) /
+                NULLIF(SUM(CAST(aboard AS REAL)), 0)
+                * 100,
+            2)                                                               AS overall_fatality_rate,
             MIN(year)                                                     AS year_min,
             MAX(year)                                                     AS year_max,
             COUNT(DISTINCT operator)                                      AS unique_operators,
@@ -37,7 +41,7 @@ def get_overview(db: Session = Depends(get_db)):
         "total_incidents":       row[0] or 0,
         "total_fatalities":      int(row[1] or 0),
         "total_aboard":          int(row[2] or 0),
-        "overall_fatality_rate": round(float(row[3] or 0) * 100, 2),
+        "overall_fatality_rate": round(float(row[3] or 0), 2),
         "year_min":              row[4],
         "year_max":              row[5],
         "unique_operators":      row[6] or 0,
@@ -62,11 +66,11 @@ def get_yearly_trends(db: Session = Depends(get_db)):
     """)
     data = [
         {
-            "year":          r[0],
-            "incidents":     r[1],
-            "fatalities":    int(r[2] or 0),
-            "fatality_rate": r[3] or 0,
-            "total_aboard":  r[4] or 0,
+            "year":              r[0],
+            "incident_count":    r[1],
+            "total_fatalities":  int(r[2] or 0),
+            "avg_fatality_rate": r[3] or 0,
+            "total_aboard":      r[4] or 0,
         }
         for r in rows
     ]
@@ -74,7 +78,7 @@ def get_yearly_trends(db: Session = Depends(get_db)):
     for i, item in enumerate(data):
         window = data[max(0, i - 4): i + 1]
         item["rolling_avg_incidents"] = round(
-            sum(w["incidents"] for w in window) / len(window), 2
+            sum(w["incident_count"] for w in window) / len(window), 2
         )
     return APIResponse(data=data)
 
