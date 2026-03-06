@@ -13,7 +13,7 @@ class IncidentBase(BaseModel):
     aircraft_type: Optional[str] = None
     registration: Optional[str] = None
     aboard: Optional[float] = None
-    fatalities: Optional[float] = None
+    fatalities: Optional[int] = None
     ground: Optional[float] = None
     summary: Optional[str] = None
 
@@ -42,7 +42,7 @@ class IncidentSummary(BaseModel):
     location: Optional[str] = None
     operator: Optional[str] = None
     aircraft_type: Optional[str] = None
-    fatalities: Optional[float] = None
+    fatalities: Optional[int] = None
     severity_label: Optional[str] = None
     cluster_id: Optional[int] = None
     aboard:            int | None          = 0

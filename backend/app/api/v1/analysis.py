@@ -23,9 +23,9 @@ def get_overview(db: Session = Depends(get_db)):
     row = _sql(db, """
         SELECT
             COUNT(*)                                                      AS total_incidents,
-            ROUND(SUM(fatalities), 1)                                     AS total_fatalities,
-            ROUND(SUM(aboard), 1)                                         AS total_aboard,
-            ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)     AS overall_fatality_rate,
+            CAST(SUM(fatalities) AS INTEGER)                                 AS total_fatalities,
+            CAST(SUM(aboard) AS INTEGER)                                         AS total_aboard,
+            CAST(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0) AS INTEGER)     AS overall_fatality_rate,
             MIN(year)                                                     AS year_min,
             MAX(year)                                                     AS year_max,
             COUNT(DISTINCT operator)                                      AS unique_operators,
@@ -52,9 +52,9 @@ def get_yearly_trends(db: Session = Depends(get_db)):
         SELECT
             year,
             COUNT(*)                                                     AS incidents,
-            ROUND(SUM(fatalities), 1)                                    AS fatalities,
+            CAST(SUM(fatalities) AS INTEGER)                                    AS fatalities,
             ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
-            ROUND(SUM(aboard), 1)                                        AS total_aboard
+            CAST(SUM(aboard) AS INTEGER)                                        AS total_aboard
         FROM incidents
         WHERE year IS NOT NULL
         GROUP BY year
@@ -86,8 +86,8 @@ def get_decade_stats(db: Session = Depends(get_db)):
         SELECT
             (year / 10) * 10                                             AS decade,
             COUNT(*)                                                     AS incidents,
-            ROUND(SUM(fatalities), 1)                                    AS fatalities,
-            ROUND(AVG(fatalities), 2)                                    AS avg_fatalities,
+            CAST(SUM(fatalities) AS INTEGER)                                    AS fatalities,
+            ROUND(AVG(fatalities), 0)                                    AS avg_fatalities,
             ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
         FROM incidents
         WHERE year IS NOT NULL
@@ -116,9 +116,9 @@ def get_operator_stats(
         SELECT
             operator,
             COUNT(*)                                                     AS incidents,
-            ROUND(SUM(fatalities), 1)                                    AS fatalities,
+            CAST(SUM(fatalities) AS INTEGER)                                    AS fatalities,
             ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate,
-            ROUND(AVG(fatalities), 2)                                    AS avg_fatalities_per_incident
+            ROUND(AVG(fatalities), 0)                                    AS avg_fatalities_per_incident
         FROM incidents
         WHERE operator IS NOT NULL AND operator != ''
         GROUP BY operator
@@ -147,7 +147,7 @@ def get_aircraft_stats(
         SELECT
             aircraft_type,
             COUNT(*)                                                     AS incidents,
-            ROUND(SUM(fatalities), 1)                                    AS fatalities,
+            CAST(SUM(fatalities) AS INTEGER)                                    AS fatalities,
             ROUND(SUM(fatalities) * 1.0 / NULLIF(SUM(aboard), 0), 4)    AS fatality_rate
         FROM incidents
         WHERE aircraft_type IS NOT NULL AND aircraft_type != ''
