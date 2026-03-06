@@ -48,7 +48,7 @@ export default function Overview() {
             icon: Activity,
             label: 'Fatal Rate',
             value: stats?.avgFatalityRate != null
-                ? `${(stats.avgFatalityRate * 100).toFixed(1)}%`
+                ? `${stats.avgFatalityRate.toFixed(1)}%`
                 : '—',
             sub: 'Incidents with deaths',
             accent: 'amber',

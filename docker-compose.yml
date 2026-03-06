@@ -13,7 +13,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - GOOGLE_API_KEY=AIzaSyB7wPF-hLbv2ZLHZBLXeqVvG18dFxDNFMU
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
     
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
