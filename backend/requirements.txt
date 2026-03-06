@@ -22,7 +22,7 @@ xgboost==2.1.1
 imbalanced-learn==0.13.0
 joblib==1.4.2
 google-genai>=1.0.0
-hdbscan==0.8.33
+hdbscan-wheel==0.8.33
 sentence-transformers==3.3.1
 
 # ── LLM ─────────────────────────────────────────────────────────────────────
