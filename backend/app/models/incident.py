@@ -21,6 +21,8 @@ class Incident(Base):
     fatality_rate                  = Column(Float)
     severity_label                 = Column(String, index=True)
     cluster_id                     = Column(Integer)
+    umap_x                         = Column(Float)
+    umap_y                         = Column(Float)
     extracted_cause_category       = Column(String)
     extracted_phase_of_flight      = Column(String)
     extracted_contributing_factors = Column(Text)

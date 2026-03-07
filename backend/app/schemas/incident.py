@@ -13,7 +13,7 @@ class IncidentBase(BaseModel):
     aircraft_type: Optional[str] = None
     registration: Optional[str] = None
     aboard: Optional[float] = None
-    fatalities: Optional[int] = None
+    fatalities: Optional[float] = None
     ground: Optional[float] = None
     summary: Optional[str] = None
 
@@ -25,6 +25,8 @@ class IncidentRead(IncidentBase):
     fatality_rate: Optional[float] = None
     severity_label: Optional[str] = None
     cluster_id: Optional[int] = None
+    umap_x: Optional[float] = None
+    umap_y: Optional[float] = None
     extracted_cause_category: Optional[str] = None
     extracted_phase_of_flight: Optional[str] = None
     extracted_contributing_factors: Optional[Any] = None
@@ -42,10 +44,10 @@ class IncidentSummary(BaseModel):
     location: Optional[str] = None
     operator: Optional[str] = None
     aircraft_type: Optional[str] = None
-    fatalities: Optional[int] = None
+    fatalities: Optional[float] = None
     severity_label: Optional[str] = None
     cluster_id: Optional[int] = None
-    aboard:            int | None          = 0
-    summary:           str | None          = None 
+    aboard:            float | None          = 0
+    summary:           str | None          = None
 
     model_config = {"from_attributes": True}
