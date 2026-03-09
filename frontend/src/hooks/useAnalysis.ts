@@ -75,8 +75,8 @@ export function useDecadeBreakdown() {
   
       return (data.data ?? []).map((d: any) => ({
         decade:          d.decade_label       ?? d.decade ?? '',
-        incidents:       d.incident_count     ?? 0,
-        fatalities:      d.total_fatalities   ?? 0,
+        incidents:       d.incidents          ?? 0,
+        fatalities:      d.fatalities         ?? 0,
         avgFatalityRate: d.avg_fatality_rate  ?? 0,
       }));
     },
