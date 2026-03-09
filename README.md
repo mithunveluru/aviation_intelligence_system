@@ -1,4 +1,4 @@
-```markdown
+
 # Aviation Failure Intelligence System
 
 A data platform for analyzing historical aviation incidents, identifying failure
