@@ -205,7 +205,7 @@ export function useIncidents(params: {
         endpoints.incidents({ runId: RUN_ID, ...params })
       );
 
-      const raw = data; 
+      const raw = data;
 
       const items: any[] = raw?.data ?? [];
       const incidents = items.map((r: any) => ({

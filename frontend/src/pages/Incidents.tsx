@@ -10,12 +10,11 @@ import PageHeader  from '../components/ui/PageHeader'
 import { useIncidents } from '../hooks/useAnalysis'
 import clsx from 'clsx'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-// ✅ FIX 1: no longer imported from seed — defined locally
+// Types
 type SortKey = 'date' | 'operator' | 'aircraft' | 'location' | 'severity' | 'fatalities' | 'aboard'
 type SortDir = 'asc' | 'desc'
 
-// ✅ FIX 2: IncidentRow shape matches API response fields (camelCase)
+// IncidentRow shape matches API response fields
 interface IncidentRow {
   id:                    number
   date:                  string
@@ -80,7 +79,7 @@ export default function Incidents() {
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [page,    setPage]    = useState(1)
 
-  // ✅ FIX 3: pass all filter state to hook — server handles filter/sort/paginate
+  // Pass all filter state to hook — server handles filter/sort/paginate
   const { data, isLoading, isError } = useIncidents({
     page,
     pageSize: PAGE_SIZE,
@@ -91,7 +90,7 @@ export default function Incidents() {
     sortDir,
   })
 
-  // ✅ FIX 4: all pagination/count values come from API response
+  // All pagination/count values come from API response
   const pageData   = (data?.incidents ?? []) as IncidentRow[]
   const totalPages = data?.totalPages ?? 1
   const totalCount = data?.total      ?? 0
@@ -176,14 +175,14 @@ export default function Incidents() {
             ))}
           </select>
 
-          {/* ✅ FIX: result count from API total, not filtered.length */}
+          {/* Result count from API total */}
           <span className="text-xs text-slate-600 ml-auto">
             {isLoading ? '…' : totalCount.toLocaleString()} results
           </span>
         </div>
       </GlassCard>
 
-      {/* ✅ FIX 5: loading and error states */}
+      {/* Loading and error states */}
       {isLoading && <LoadingSkeleton />}
 
       {isError && (

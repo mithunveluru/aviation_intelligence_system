@@ -26,7 +26,7 @@ export const queryClient = new QueryClient({
 // ─── API Endpoint Builders ────────────────────────────────────────────────────
 export const endpoints = {
 
-  // ✅ FIXED: match existing backend routes (no run_id needed for analysis)
+  // Match existing backend routes
   stats:           () => `/analysis/overview`,
   yearlyTrends:    () => `/analysis/trends/yearly`,
   decadeBreakdown: () => `/analysis/trends/decade`,
