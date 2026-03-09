@@ -291,7 +291,7 @@ https://aviation-intelligence-system.onrender.com
 
 ## 2 Project Preview
 
-![Dashboard Preview](docs/dashboard_demo.gif)
+![Dashboard Preview](docs/dashboard_test.gif)
 
 Interactive dashboard for exploring aviation incident clusters, severity trends, and historical patterns.
 
