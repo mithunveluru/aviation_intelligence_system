@@ -60,10 +60,10 @@ export function useDecadeBreakdown() {
         queryFn: async () => {
             const { data } = await api.get(endpoints.decadeBreakdown());
             return (data.data ?? []).map((d) => ({
-                decade: d.decade_label ?? d.decade ?? '',
-                incidents: d.incident_count ?? 0,
-                fatalities: d.total_fatalities ?? 0,
-                avgFatalityRate: d.avg_fatality_rate ?? 0,
+                decade: d.decade ?? '',
+                incidents: d.incidents ?? 0,
+                fatalities: d.fatalities ?? 0,
+                avgFatalityRate: d.avg_fatalities ?? 0,
             }));
         },
     });
