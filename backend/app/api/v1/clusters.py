@@ -50,7 +50,7 @@ def _serialize(c: Cluster) -> dict:
 
 @router.get("")
 def get_clusters(db: Session = Depends(get_db)):
-    clusters = db.query(Cluster).order_by(Cluster.cluster_label).all()
+    clusters = db.query(Cluster).filter(Cluster.cluster_label != -1).order_by(Cluster.cluster_label).all()
     return {"success": True, "data": [_serialize(c) for c in clusters]}
 
 
