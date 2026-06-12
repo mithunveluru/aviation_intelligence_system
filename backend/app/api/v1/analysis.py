@@ -224,9 +224,9 @@ def get_umap_data(
 # ─── /correlations ────────────────────────────────────────────────────────────
 @router.get("/correlations", response_model=APIResponse[dict])
 def get_correlation_matrix(db: Session = Depends(get_db)):
-    # Only load the 6 numeric columns needed — not full table
+    # Only load the numeric columns needed — not full table
     df = pd.read_sql(
-        "SELECT aboard, fatalities, ground, year, fatality_rate, survival_count FROM incidents",
+        "SELECT aboard, fatalities, ground, year, fatality_rate FROM incidents",
         engine,
     )
     df = df.apply(pd.to_numeric, errors="coerce").dropna()

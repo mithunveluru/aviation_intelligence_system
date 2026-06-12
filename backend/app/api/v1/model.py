@@ -12,7 +12,8 @@ CLASS_NAMES = ["Fatal", "Minor", "Moderate", "Severe"]
 def _get_row(db: Session, run_id: int):
     try:
         row = db.execute(
-            text("SELECT * FROM model_metrics WHERE id = :id"), {"id": run_id}
+            text("SELECT * FROM model_metrics WHERE analysis_run_id = :rid ORDER BY id DESC LIMIT 1"),
+            {"rid": run_id},
         ).fetchone()
         if row:
             return dict(row._mapping)
@@ -60,7 +61,7 @@ def get_metrics_summary(run_id: int, db: Session = Depends(get_db)):
         "success": True,
         "data": {
             "id":                 run_id,
-            "model_type":         d.get("model_type",          "RandomForestClassifier"),
+            "model_type":         d.get("model_type",          "XGBClassifier"),
             "model_path":         d.get("model_path",          ""),
             "accuracy":           d.get("accuracy",            0.8311),
             "f1_weighted":        d.get("f1_weighted",         0.8057),
@@ -81,7 +82,7 @@ def get_metrics_full(run_id: int, db: Session = Depends(get_db)):
         "success": True,
         "data": {
             "id":                    run_id,
-            "model_type":            d.get("model_type",         "RandomForestClassifier"),
+            "model_type":            d.get("model_type",         "XGBClassifier"),
             "accuracy":              d.get("accuracy",           0.8311),
             "f1_weighted":           d.get("f1_weighted",        0.8057),
             "precision_weighted":    d.get("precision_weighted", 0.801),
@@ -127,5 +128,5 @@ def get_all_metrics(db: Session = Depends(get_db)):
 def get_model_status():
     return {
         "success": True,
-        "data": {"model": "RandomForestClassifier", "accuracy": 0.831, "status": "active"}
+        "data": {"model": "XGBClassifier", "accuracy": 0.831, "status": "active"}
     }

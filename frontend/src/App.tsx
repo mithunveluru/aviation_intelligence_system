@@ -12,17 +12,18 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
-      retry: 3,           
-      retryDelay: 5000,   
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+      refetchOnWindowFocus: false,
     },
   },
 })
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:10000'
+
 export default function App() {
- 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/`)
-      .catch(() => {})
+    fetch(`${API_BASE}/`).catch(() => {})
   }, [])
 
   return (

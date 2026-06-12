@@ -1,13 +1,23 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 venv/
 .env
+.env.local
 
 # Backend
 backend/venv/
 backend/logs/
 backend/catboost_info/
+backend/data/uploads/
+backend/data/processed/
+backend/data/reports/
+
+# Database backups
+*.db.bak
+aviation_backup_*.db
+aviation_backup_original.db
 
 # Frontend
 node_modules/
@@ -16,9 +26,23 @@ dist/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+frontend/tsconfig.tsbuildinfo
+
+# Compiled TypeScript output alongside source (keep .ts, ignore generated .js/.d.ts)
+frontend/src/**/*.js
+frontend/src/**/*.js.map
+frontend/src/**/*.d.ts
+frontend/src/**/*.d.ts.map
+frontend/tailwind.config.js
+frontend/tailwind.config.js.map
+frontend/tailwind.config.d.ts
+frontend/tailwind.config.d.ts.map
+frontend/vite.config.js
+frontend/vite.config.js.map
+frontend/vite.config.d.ts
+frontend/vite.config.d.ts.map
 
 # OS
 .DS_Store
-*.pyc
-__pycache__/
+Thumbs.db
 

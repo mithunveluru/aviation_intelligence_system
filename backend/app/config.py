@@ -45,12 +45,11 @@ class Settings(BaseSettings):
 
     # ── CORS ──────────────────────────────────────────────────────
     ALLOWED_ORIGINS: list[str] = [
-    "*",
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://aviation-intelligence-system.onrender.com",
-    "https://aviation-intelligence-system.vercel.app",
-]
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://aviation-intelligence-system.onrender.com",
+        "https://aviation-intelligence-system.vercel.app",
+    ]
 
 
     @field_validator("ALLOWED_ORIGINS", mode="before")

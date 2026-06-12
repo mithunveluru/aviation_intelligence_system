@@ -160,10 +160,10 @@ export function useModelMetricsFull() {
     queryFn: async () => {
       const { data } = await api.get(endpoints.modelMetricsFull(RUN_ID));
       const d = data.data;
-      const classificationReport = d.classification_report ?? {};
       return {
         ...d,
-        classificationReport,  
+        classificationReport: d.classification_report ?? {},
+        tfidfVocabSize:       d.tfidf_vocab_size       ?? 600,
       };
     },
   });
@@ -206,23 +206,22 @@ export function useIncidents(params: {
       );
 
       const raw = data;
-
       const items: any[] = raw?.data ?? [];
       const incidents = items.map((r: any) => ({
-        id:                    r.id,
-        date:                  r.date                     ?? '',
-        operator:              r.operator                  ?? 'Unknown',
-        aircraft:              r.aircraft_type             ?? r.aircraft ?? 'Unknown',
-        location:              r.location                  ?? 'Unknown',
-        fatalities:            r.fatalities                ?? 0,
-        aboard:                r.aboard                    ?? 0,
-        severity:              r.severity_label            ?? r.severity ?? 'Unknown',
-        summary:               r.summary                   ?? '',
-        cluster:               r.cluster_id                ?? -1,
-        predictedSeverity:     r.predicted_severity        ?? '',
-        predictionConfidence:  r.prediction_confidence     ?? 0,
-        extractedCauseCategory:r.extracted_cause_category  ?? '',
-        extractedPhaseOfFlight:r.extracted_phase_of_flight ?? '',
+        id:                     r.id,
+        date:                   r.date                     ?? '',
+        operator:               r.operator                  ?? 'Unknown',
+        aircraft:               r.aircraft_type             ?? r.aircraft ?? 'Unknown',
+        location:               r.location                  ?? 'Unknown',
+        fatalities:             r.fatalities                ?? 0,
+        aboard:                 r.aboard                    ?? 0,
+        severity:               r.severity_label            ?? r.severity ?? 'Unknown',
+        summary:                r.summary                   ?? '',
+        cluster:                r.cluster_id                ?? -1,
+        predictedSeverity:      r.predicted_severity        ?? '',
+        predictionConfidence:   r.prediction_confidence     ?? 0,
+        extractedCauseCategory: r.extracted_cause_category  ?? '',
+        extractedPhaseOfFlight: r.extracted_phase_of_flight ?? '',
       }));
 
       return {
@@ -234,6 +233,39 @@ export function useIncidents(params: {
       };
     },
     placeholderData: (previousData: any) => previousData,
+  });
+}
+
+export function useIncidentDetail(id: number | null) {
+  return useQuery({
+    queryKey: ['incident-detail', id],
+    enabled:  id !== null,
+    queryFn: async () => {
+      const { data } = await api.get(endpoints.incidentDetail(id!));
+      const r = data.data;
+      return {
+        id:                     r.id,
+        date:                   r.date                     ?? '',
+        operator:               r.operator                  ?? 'Unknown',
+        aircraft:               r.aircraft_type             ?? 'Unknown',
+        location:               r.location                  ?? 'Unknown',
+        fatalities:             r.fatalities                ?? 0,
+        aboard:                 r.aboard                    ?? 0,
+        severity:               r.severity_label            ?? 'Unknown',
+        summary:                r.summary                   ?? '',
+        cluster:                r.cluster_id                ?? -1,
+        predictedSeverity:      r.predicted_severity        ?? '',
+        predictionConfidence:   r.prediction_confidence     ?? 0,
+        extractedCauseCategory: r.extracted_cause_category  ?? '',
+        extractedPhaseOfFlight: r.extracted_phase_of_flight ?? '',
+        extractedContributingFactors: r.extracted_contributing_factors ?? '',
+        route:                  r.route                     ?? '',
+        registration:           r.registration              ?? '',
+        ground:                 r.ground                    ?? 0,
+        year:                   r.year                      ?? null,
+        fatalityRate:           r.fatality_rate             ?? null,
+      };
+    },
   });
 }
 

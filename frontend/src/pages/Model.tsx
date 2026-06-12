@@ -1,7 +1,8 @@
-import { BrainCircuit, AlertTriangle } from 'lucide-react'
+import { BrainCircuit } from 'lucide-react'
 import { motion } from 'framer-motion'
-import GlassCard from '../components/ui/GlassCard'
+import GlassCard  from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
+import ErrorState from '../components/ui/ErrorState'
 import { useModelMetrics, useConfusionMatrix, useModelMetricsFull } from '../hooks/useAnalysis'
 import clsx from 'clsx'
 
@@ -38,23 +39,6 @@ function LoadingSkeleton() {
   )
 }
 
-function ErrorState() {
-  return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <AlertTriangle className="text-red-400" size={32} />
-      <p className="text-slate-400 text-sm">
-        Failed to load model metrics. Is the backend running on{' '}
-        <code className="text-cyan-400">localhost:8000</code>?
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors"
-      >
-        Retry
-      </button>
-    </div>
-  )
-}
 
 export default function Model() {
   const { data: metrics,     isLoading: metricsLoading, isError: metricsError } = useModelMetrics()
@@ -108,7 +92,7 @@ export default function Model() {
       <PageHeader
         icon={BrainCircuit}
         title="Model Performance"
-        subtitle="Random Forest severity classifier — Phase 5 evaluation metrics"
+        subtitle="XGBoost severity classifier — evaluation metrics and per-class performance"
       />
 
       {/* Top metric pills */}
@@ -272,11 +256,11 @@ export default function Model() {
           {/* Model info — live from API */}
           <div className="mt-5 pt-4 border-t border-white/[0.06] space-y-1.5 text-[10px] text-slate-500">
             {([
-              ['Algorithm',   `Random Forest (n=${nEstimators})`],
+              ['Algorithm',   `XGBoost (n=${nEstimators})`],
               ['Features',    '8 contextual features'],
               ['Train set',   `${trainSamples.toLocaleString()} incidents`],
               ['Test set',    `${testSamples.toLocaleString()} incidents`],
-              ['aboard Δ F1', '+6.8% improvement'],
+              ['TF-IDF terms',  `${(fullMetrics?.tfidfVocabSize ?? 600).toLocaleString()}`],
             ] as [string, string][]).map(([k, v]) => (
               <div key={k} className="flex justify-between">
                 <span>{k}</span>

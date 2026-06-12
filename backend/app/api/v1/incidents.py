@@ -32,7 +32,7 @@ def list_incidents(
     decade:    str | None   = Query(None,                      description="Filter by decade e.g. 1980s"),
     search:    str | None   = Query(None,                      description="Search operator/aircraft/location/summary"),
     sort_key:  str          = Query("date",                    description="Sort column"),
-    sort_dir:  str          = Query("desc", regex="^(asc|desc)$", description="asc or desc"),
+    sort_dir:  str          = Query("desc", pattern="^(asc|desc)$", description="asc or desc"),
     db: Session = Depends(get_db),
 ):
     query = db.query(Incident)

@@ -168,7 +168,7 @@ class PipelineOrchestrator:
 
             db.add(ModelMetrics(
                 analysis_run_id        = run_id,
-                model_type             = "RandomForestClassifier",
+                model_type             = "XGBClassifier",
                 accuracy               = metrics["accuracy"],
                 precision_weighted     = metrics["precision_weighted"],
                 recall_weighted        = metrics["recall_weighted"],

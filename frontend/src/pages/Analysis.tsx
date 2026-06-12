@@ -1,11 +1,12 @@
-import { BarChart3, Info, AlertTriangle } from 'lucide-react'
+import { BarChart3, Info } from 'lucide-react'
 import {
   ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis,
   CartesianGrid, Tooltip, Cell, BarChart, Bar,
   PieChart, Pie,
 } from 'recharts'
-import GlassCard from '../components/ui/GlassCard'
+import GlassCard  from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
+import ErrorState from '../components/ui/ErrorState'
 import {
   useUMAPData,
   useSeverityDist,
@@ -67,24 +68,6 @@ function LoadingSkeleton() {
   )
 }
 
-// ─── Error State ──────────────────────────────────────────────────────────────
-function ErrorState() {
-  return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <AlertTriangle className="text-red-400" size={32} />
-      <p className="text-slate-400 text-sm">
-        Failed to load analysis data. Is the backend running on{' '}
-        <code className="text-cyan-400">localhost:8000</code>?
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors"
-      >
-        Retry
-      </button>
-    </div>
-  )
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Analysis() {

@@ -234,7 +234,7 @@ class LLMService:
             if marker in clean:
                 parts = clean.split(marker)
                 if len(parts) >= 2:
-                    clean = parts[1].split("```").strip()
+                    clean = parts[1].split("```")[0].strip()
                     break
         try:
             return json.loads(clean)

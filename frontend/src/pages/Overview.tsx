@@ -6,12 +6,12 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip,
 } from 'recharts'
-import StatCard from '../components/ui/StatCard'
-import GlassCard from '../components/ui/GlassCard'
+import StatCard   from '../components/ui/StatCard'
+import GlassCard  from '../components/ui/GlassCard'
 import PageHeader from '../components/ui/PageHeader'
+import ErrorState from '../components/ui/ErrorState'
 import { useStats, useYearlyTrends } from '../hooks/useAnalysis'
 
-// ─── Tooltip ──────────────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
@@ -26,7 +26,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   )
 }
 
-// ─── Loading Skeleton ─────────────────────────────────────────────────────────
 function LoadingSkeleton() {
   return (
     <div className="animate-pulse space-y-6">
@@ -40,7 +39,6 @@ function LoadingSkeleton() {
   )
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function Overview() {
   const { data: stats, isLoading: statsLoading, isError: statsError } = useStats()
   const { data: yearlyTrends, isLoading: trendsLoading, isError: trendsError } = useYearlyTrends()
@@ -48,97 +46,65 @@ export default function Overview() {
   const isLoading = statsLoading || trendsLoading
   const isError   = statsError  || trendsError
 
-  // ✅ FIX 1: chartData derived from real API data INSIDE component
   const chartData = (yearlyTrends ?? []).filter(
     (d: any) => d.year >= 1930 && d.year % 2 === 0
   )
 
-  // ✅ FIX 2: STATS built dynamically from API, with safe fallbacks
   const STATS = [
     {
       icon:   Plane,
       label:  'Total Incidents',
-      value:  stats?.totalIncidents
-                ? stats.totalIncidents.toLocaleString()
-                : '—',
-      sub:    '1908 – 2009',
+      value:  stats?.totalIncidents ? stats.totalIncidents.toLocaleString() : '—',
+      sub:    `${stats?.yearMin ?? '1908'} – ${stats?.yearMax ?? '2020'}`,
       accent: 'cyan' as const,
     },
     {
       icon:   AlertTriangle,
       label:  'Total Fatalities',
-      value:  stats?.totalFatalities
-                ? stats.totalFatalities.toLocaleString()
-                : '—',
+      value:  stats?.totalFatalities ? stats.totalFatalities.toLocaleString() : '—',
       sub:    'Across all incidents',
       accent: 'red' as const,
     },
     {
       icon:   Activity,
       label:  'Fatal Rate',
-      value:  stats?.avgFatalityRate != null
-                ? `${stats.avgFatalityRate.toFixed(1)}%`
-                : '—',
+      value:  stats?.avgFatalityRate != null ? `${stats.avgFatalityRate.toFixed(1)}%` : '—',
       sub:    'Incidents with deaths',
       accent: 'amber' as const,
     },
     {
-  icon:   TrendingDown,
-  label:  'Model Accuracy',
-  value:  stats?.modelAccuracy
-            ? `${(stats.modelAccuracy * 100).toFixed(1)}%`
-            : '—',
-  sub:    'RandomForest classifier',
-  accent: 'teal' as const,
-},
-{
-  icon:   Users,
-  label:  'Total Clusters',
-  value:  stats?.totalClusters != null
-            ? String(stats.totalClusters)
-            : '—',
-  sub:    'HDBSCAN failure patterns',
-  accent: 'emerald' as const,
-},
+      icon:   TrendingDown,
+      label:  'Model Accuracy',
+      value:  stats?.modelAccuracy ? `${(stats.modelAccuracy * 100).toFixed(1)}%` : '—',
+      sub:    'XGBoost severity classifier',
+      accent: 'teal' as const,
+    },
+    {
+      icon:   Users,
+      label:  'Clusters',
+      value:  stats?.totalClusters != null ? String(stats.totalClusters) : '—',
+      sub:    'HDBSCAN failure patterns',
+      accent: 'emerald' as const,
+    },
   ]
 
-  // ─── Render States ──────────────────────────────────────────────────────────
   if (isLoading) return <LoadingSkeleton />
+  if (isError)   return <ErrorState />
 
-  // ✅ FIX 3: Error state added
-  if (isError) return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <AlertTriangle className="text-red-400" size={32} />
-      <p className="text-slate-400 text-sm">
-        Failed to load overview data. Is the backend running on{' '}
-        <code className="text-cyan-400">localhost:8000</code>?
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors"
-      >
-        Retry
-      </button>
-    </div>
-  )
-
-  // ─── Main Render ────────────────────────────────────────────────────────────
   return (
     <div>
       <PageHeader
         icon={Activity}
         title="Overview"
-        subtitle="Global aviation incident statistics from 1908 to 2009"
+        subtitle="Global aviation incident statistics from 1908 to 2020"
       />
 
-      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         {STATS.map((s, i) => (
           <StatCard key={s.label} {...s} delay={i * 0.06} />
         ))}
       </div>
 
-      {/* Yearly trend chart */}
       <GlassCard delay={0.3} className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -146,7 +112,7 @@ export default function Overview() {
               Incidents &amp; Fatalities — Yearly Trend
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              1930–2009 · Every other year shown for clarity
+              1930–2020 · Every other year shown for clarity
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -161,7 +127,6 @@ export default function Overview() {
           </div>
         </div>
 
-        {/* Empty state if no chart data */}
         {chartData.length === 0 ? (
           <div className="h-80 flex items-center justify-center text-slate-500 text-sm">
             No trend data available yet.

@@ -3,22 +3,24 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   build: {
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion'],
-          charts: ['recharts'],
-          query: ['@tanstack/react-query'],
-        }
-      }
-    }
+          'react-vendor':   ['react', 'react-dom', 'react-router-dom'],
+          'motion':         ['framer-motion'],
+          'charts':         ['recharts'],
+          'query':          ['@tanstack/react-query'],
+          'ui':             ['lucide-react', 'clsx', 'axios'],
+        },
+      },
+    },
   },
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/api': { target: 'http://localhost:10000', changeOrigin: true },
     },
   },
 })

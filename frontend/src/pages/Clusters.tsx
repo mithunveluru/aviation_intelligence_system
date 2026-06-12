@@ -1,8 +1,9 @@
-import { Network, AlertTriangle } from 'lucide-react'
+import { Network } from 'lucide-react'
 import { motion } from 'framer-motion'
-import GlassCard from '../components/ui/GlassCard'
-import Badge from '../components/ui/Badge'
+import GlassCard  from '../components/ui/GlassCard'
+import Badge      from '../components/ui/Badge'
 import PageHeader from '../components/ui/PageHeader'
+import ErrorState from '../components/ui/ErrorState'
 import { useClusters } from '../hooks/useAnalysis'
 
 // ─── Cluster accent colours (no colour field in API — derive from index) ──────
@@ -57,21 +58,7 @@ export default function Clusters() {
   // ─── States ─────────────────────────────────────────────────────────────────
   if (isLoading) return <LoadingSkeleton />
 
-  if (isError) return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <AlertTriangle className="text-red-400" size={32} />
-      <p className="text-slate-400 text-sm">
-        Failed to load clusters. Is the backend running on{' '}
-        <code className="text-cyan-400">localhost:8000</code>?
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="text-xs text-cyan-400 border border-cyan-400/30 px-3 py-1.5 rounded-lg hover:bg-cyan-400/10 transition-colors"
-      >
-        Retry
-      </button>
-    </div>
-  )
+  if (isError) return <ErrorState />
 
   if (!clusters?.length) return (
     <div className="flex flex-col items-center justify-center h-64 gap-2">

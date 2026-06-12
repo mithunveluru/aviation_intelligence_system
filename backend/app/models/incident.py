@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text
 from app.database import Base
 
+
 class Incident(Base):
     __tablename__ = "incidents"
     id                             = Column(Integer, primary_key=True, index=True)
@@ -16,6 +17,7 @@ class Incident(Base):
     aboard                         = Column(Float)
     fatalities                     = Column(Float)
     ground                         = Column(Float)
+    survival_count                 = Column(Float)
     summary                        = Column(Text)
     year                           = Column(Integer, index=True)
     fatality_rate                  = Column(Float)
@@ -26,6 +28,7 @@ class Incident(Base):
     extracted_cause_category       = Column(String)
     extracted_phase_of_flight      = Column(String)
     extracted_contributing_factors = Column(Text)
+    extracted_at                   = Column(DateTime)
     predicted_severity             = Column(String)
     prediction_confidence          = Column(Float)
     created_at                     = Column(DateTime, default=datetime.utcnow)
