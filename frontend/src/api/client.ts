@@ -16,6 +16,8 @@ export const endpoints = {
   decadeBreakdown: () => `/analysis/trends/decade`,
   severityDist:    () => `/analysis/severity-dist`,
   umapData:        () => `/analysis/umap`,
+  topOperators:    () => `/analysis/operators`,
+  topAircraft:     () => `/analysis/aircraft`,
 
   // Pipeline
   pipelineStatus: (runId: number) => `/pipeline/${runId}/status`,

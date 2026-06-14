@@ -4,7 +4,7 @@ import AviationBg from './AviationBg'
 
 export default function Layout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-navy-950">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
       <AviationBg />
       <Sidebar />
       <main
@@ -12,7 +12,7 @@ export default function Layout() {
         id="main-content"
         tabIndex={-1}
       >
-        <div className="max-w-[1400px] mx-auto p-6">
+        <div className="max-w-[1440px] mx-auto p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

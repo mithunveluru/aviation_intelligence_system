@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
   Table2, Search, ChevronUp, ChevronDown,
-  ChevronsUpDown, X, ExternalLink,
+  ChevronsUpDown, X, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import GlassCard   from '../components/ui/GlassCard'
@@ -9,6 +9,7 @@ import Badge       from '../components/ui/Badge'
 import PageHeader  from '../components/ui/PageHeader'
 import ErrorState  from '../components/ui/ErrorState'
 import { useIncidents } from '../hooks/useAnalysis'
+import { fmtCount } from '../utils/format'
 import clsx from 'clsx'
 
 type SortKey = 'date' | 'operator' | 'aircraft' | 'location' | 'severity' | 'fatalities' | 'aboard'
@@ -32,38 +33,40 @@ interface IncidentRow {
 }
 
 const SEVERITIES = ['All', 'Fatal', 'Severe', 'Moderate', 'Minor']
-const DECADES    = [
+const DECADES = [
   'All',
-  '1910s', '1920s', '1930s', '1940s', '1950s',
-  '1960s', '1970s', '1980s', '1990s', '2000s', '2010s',
+  '1910s','1920s','1930s','1940s','1950s',
+  '1960s','1970s','1980s','1990s','2000s','2010s',
 ]
 const PAGE_SIZE = 12
 
-const COLS: { key: SortKey; label: string; width: string }[] = [
-  { key: 'date',       label: 'Date',       width: 'w-24' },
-  { key: 'operator',   label: 'Operator',   width: 'w-44' },
-  { key: 'aircraft',   label: 'Aircraft',   width: 'w-44' },
-  { key: 'location',   label: 'Location',   width: 'w-40' },
-  { key: 'severity',   label: 'Severity',   width: 'w-24' },
-  { key: 'fatalities', label: 'Fatalities', width: 'w-24' },
-  { key: 'aboard',     label: 'Aboard',     width: 'w-20' },
+const COLS: { key: SortKey; label: string; align?: 'right' }[] = [
+  { key: 'date',       label: 'Date'       },
+  { key: 'operator',   label: 'Operator'   },
+  { key: 'aircraft',   label: 'Aircraft'   },
+  { key: 'location',   label: 'Location'   },
+  { key: 'severity',   label: 'Severity'   },
+  { key: 'fatalities', label: 'Fatalities', align: 'right' },
+  { key: 'aboard',     label: 'Aboard',    align: 'right' },
 ]
 
 function SortIcon({ col, sortKey, dir }: { col: SortKey; sortKey: SortKey; dir: SortDir }) {
   if (col !== sortKey)
-    return <ChevronsUpDown size={11} className="opacity-30 ml-1 inline" />
+    return <ChevronsUpDown size={10} className="opacity-25 ml-1 inline" />
   return dir === 'asc'
-    ? <ChevronUp   size={11} className="text-cyan-400 ml-1 inline" />
-    : <ChevronDown size={11} className="text-cyan-400 ml-1 inline" />
+    ? <ChevronUp   size={10} className="text-cyan-400 ml-1 inline" />
+    : <ChevronDown size={10} className="text-cyan-400 ml-1 inline" />
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-4">
-      <div className="h-14 rounded-xl bg-white/5" />
-      <div className="rounded-xl bg-white/5 overflow-hidden">
+    <div className="space-y-4">
+      <div className="h-12 rounded-xl skeleton" />
+      <div className="rounded-xl overflow-hidden panel">
         {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-          <div key={i} className="h-12 border-b border-white/[0.04] bg-white/[0.02]" />
+          <div key={i} className="h-11 border-b border-white/[0.04]">
+            <div className="h-3 skeleton rounded mx-4 my-4 w-48" />
+          </div>
         ))}
       </div>
     </div>
@@ -77,15 +80,15 @@ function IncidentModal({ incident, onClose }: { incident: IncidentRow; onClose: 
     ['Operator',      incident.operator],
     ['Aircraft',      incident.aircraft],
     ['Location',      incident.location],
-    ['Fatalities',    incident.fatalities],
-    ['Aboard',        incident.aboard],
-    ['Cluster',       incident.cluster >= 0 ? `Cluster ${incident.cluster}` : 'Noise / Unclustered'],
+    ['Fatalities',    fmtCount(incident.fatalities)],
+    ['Aboard',        fmtCount(incident.aboard)],
+    ['Cluster',       incident.cluster >= 0 ? `Cluster ${incident.cluster}` : 'Noise'],
     ['Phase',         incident.extractedPhaseOfFlight || '—'],
     ['Cause',         incident.extractedCauseCategory || '—'],
   ]
   if (incident.predictedSeverity) {
-    fields.push(['Predicted Severity', incident.predictedSeverity])
-    fields.push(['Confidence', `${(incident.predictionConfidence * 100).toFixed(0)}%`])
+    fields.push(['Pred. Severity', incident.predictedSeverity])
+    fields.push(['Confidence', `${Math.round(incident.predictionConfidence * 100)}%`])
   }
 
   return (
@@ -95,44 +98,50 @@ function IncidentModal({ incident, onClose }: { incident: IncidentRow; onClose: 
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ background: 'rgba(2,8,23,0.85)', backdropFilter: 'blur(8px)' }}
+        style={{ background: 'rgba(2,8,23,0.88)', backdropFilter: 'blur(8px)' }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          initial={{ opacity: 0, scale: 0.96, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 12 }}
-          transition={{ duration: 0.2 }}
-          className="glass rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto"
+          exit={{ opacity: 0, scale: 0.96, y: 10 }}
+          transition={{ duration: 0.18 }}
+          className="glass rounded-2xl p-6 max-w-2xl w-full max-h-[88vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start justify-between mb-4">
+          {/* Modal header */}
+          <div className="flex items-start justify-between mb-5">
             <div className="flex items-center gap-2.5">
               <Badge label={incident.severity} />
-              <span className="text-xs text-slate-500">Incident #{incident.id}</span>
+              <span className="text-[11px] text-slate-600">ID #{incident.id}</span>
             </div>
             <button
               onClick={onClose}
-              aria-label="Close incident detail"
-              className="text-slate-500 hover:text-slate-300 transition-colors
-                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded"
+              aria-label="Close"
+              className="text-slate-600 hover:text-slate-300 transition-colors
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50
+                         rounded p-0.5"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 mb-5 text-xs">
+          {/* Fields grid */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-3.5 mb-5">
             {fields.map(([label, val]) => (
               <div key={label}>
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-0.5">{label}</p>
-                <p className="text-slate-200 font-medium">{val}</p>
+                <p className="metric-label mb-0.5">{label}</p>
+                <p className="text-sm text-slate-200 font-medium">{val}</p>
               </div>
             ))}
           </div>
 
+          {/* Summary */}
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Incident Summary</p>
-            <p className="text-sm text-slate-300 leading-relaxed">{incident.summary || 'No summary available.'}</p>
+            <p className="metric-label mb-2">Incident Summary</p>
+            <p className="text-sm text-slate-300 leading-relaxed">
+              {incident.summary || 'No summary available.'}
+            </p>
           </div>
         </motion.div>
       </motion.div>
@@ -142,25 +151,20 @@ function IncidentModal({ incident, onClose }: { incident: IncidentRow; onClose: 
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Incidents() {
-  const [q,         setQ]         = useState('')
-  const [sev,       setSev]       = useState('All')
-  const [decade,    setDecade]    = useState('All')
-  const [sortKey,   setSortKey]   = useState<SortKey>('date')
-  const [sortDir,   setSortDir]   = useState<SortDir>('desc')
-  const [page,      setPage]      = useState(1)
-  const [selected,  setSelected]  = useState<IncidentRow | null>(null)
+  const [q,        setQ]        = useState('')
+  const [sev,      setSev]      = useState('All')
+  const [decade,   setDecade]   = useState('All')
+  const [sortKey,  setSortKey]  = useState<SortKey>('date')
+  const [sortDir,  setSortDir]  = useState<SortDir>('desc')
+  const [page,     setPage]     = useState(1)
+  const [selected, setSelected] = useState<IncidentRow | null>(null)
 
   const { data, isLoading, isError } = useIncidents({
-    page,
-    pageSize: PAGE_SIZE,
-    severity: sev,
-    decade,
-    search:   q,
-    sortKey,
-    sortDir,
+    page, pageSize: PAGE_SIZE, severity: sev, decade,
+    search: q, sortKey, sortDir,
   })
 
-  const pageData   = (data?.incidents ?? []) as IncidentRow[]
+  const rows       = (data?.incidents ?? []) as IncidentRow[]
   const totalPages = data?.totalPages ?? 1
   const totalCount = data?.total      ?? 0
 
@@ -170,11 +174,6 @@ export default function Incidents() {
     setPage(1)
   }
 
-  const handleSearch = (v: string) => { setQ(v);      setPage(1) }
-  const handleSev    = (v: string) => { setSev(v);    setPage(1) }
-  const handleDecade = (v: string) => { setDecade(v); setPage(1) }
-
-  // Smart pagination: show window of pages around current
   const pageNumbers = () => {
     if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
     const start = Math.max(1, page - 3)
@@ -191,46 +190,52 @@ export default function Incidents() {
       <PageHeader
         icon={Table2}
         title="Incident Records"
-        subtitle="Searchable and filterable aviation incident database"
-      />
+        subtitle="Searchable, filterable aviation incident database"
+      >
+        {!isLoading && (
+          <span className="text-xs text-slate-600 tabular-nums">
+            {fmtCount(totalCount)} records
+          </span>
+        )}
+      </PageHeader>
 
       {/* Filters */}
-      <GlassCard delay={0.05} className="p-4 mb-5">
-        <div className="flex flex-wrap gap-3 items-center">
+      <GlassCard delay={0.05} className="p-3.5 mb-4">
+        <div className="flex flex-wrap gap-2 items-center">
 
           {/* Search */}
           <div className="relative flex-1 min-w-[200px]">
             <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none"
             />
             <input
               type="search"
               placeholder="Search operator, aircraft, location…"
               value={q}
-              onChange={e => handleSearch(e.target.value)}
+              onChange={e => { setQ(e.target.value); setPage(1) }}
               aria-label="Search incidents"
-              className="w-full pl-9 pr-4 py-2 rounded-lg text-sm
-                         bg-white/[0.04] border border-white/[0.08]
-                         text-slate-300 placeholder-slate-600
-                         focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.06]
+              className="w-full pl-9 pr-3 py-2 rounded-lg text-xs
+                         bg-white/[0.04] border border-white/[0.06]
+                         text-slate-300 placeholder-slate-700
+                         focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.06]
                          transition-colors"
             />
           </div>
 
           {/* Severity filter */}
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-1">
             {SEVERITIES.map(s => (
               <button
                 key={s}
-                onClick={() => handleSev(s)}
+                onClick={() => { setSev(s); setPage(1) }}
                 aria-pressed={sev === s}
                 className={clsx(
-                  'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500',
+                  'px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
                   sev === s
-                    ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/25'
-                    : 'text-slate-500 hover:text-slate-300 border border-transparent hover:border-white/[0.06]',
+                    ? 'bg-cyan-500/12 text-cyan-400 border border-cyan-500/20'
+                    : 'text-slate-600 hover:text-slate-400 border border-transparent hover:border-white/[0.06]',
                 )}
               >
                 {s}
@@ -241,21 +246,17 @@ export default function Incidents() {
           {/* Decade filter */}
           <select
             value={decade}
-            onChange={e => handleDecade(e.target.value)}
+            onChange={e => { setDecade(e.target.value); setPage(1) }}
             aria-label="Filter by decade"
-            className="px-3 py-2 rounded-lg text-xs bg-white/[0.04]
-                       border border-white/[0.08] text-slate-400
-                       focus:outline-none focus:border-cyan-500/50
+            className="px-2.5 py-2 rounded-lg text-[11px] bg-white/[0.04]
+                       border border-white/[0.06] text-slate-500
+                       focus:outline-none focus:border-cyan-500/40
                        transition-colors"
           >
             {DECADES.map(d => (
               <option key={d} value={d}>{d === 'All' ? 'All decades' : d}</option>
             ))}
           </select>
-
-          <span className="text-xs text-slate-600 ml-auto">
-            {isLoading ? '…' : totalCount.toLocaleString()} results
-          </span>
         </div>
       </GlassCard>
 
@@ -273,9 +274,9 @@ export default function Incidents() {
                       key={c.key}
                       onClick={() => toggleSort(c.key)}
                       className={clsx(
-                        'px-4 py-3 text-left font-medium text-slate-500',
-                        'hover:text-slate-300 cursor-pointer select-none transition-colors',
-                        c.width,
+                        'px-4 py-3 font-medium text-slate-600 text-[11px]',
+                        'hover:text-slate-400 cursor-pointer select-none transition-colors',
+                        c.align === 'right' ? 'text-right' : 'text-left',
                       )}
                       aria-sort={
                         sortKey === c.key
@@ -287,55 +288,65 @@ export default function Incidents() {
                       <SortIcon col={c.key} sortKey={sortKey} dir={sortDir} />
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left font-medium text-slate-500 min-w-[160px]">
+                  <th className="px-4 py-3 text-left font-medium text-slate-600 text-[11px] min-w-[180px]">
                     Summary
                   </th>
-                  <th className="px-4 py-3 w-8" />
                 </tr>
               </thead>
 
               <tbody>
                 <AnimatePresence mode="wait">
-                  {pageData.map((row, i) => (
+                  {rows.map((row, i) => (
                     <motion.tr
                       key={row.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={{ delay: i * 0.015, duration: 0.2 }}
+                      transition={{ delay: i * 0.012, duration: 0.18 }}
                       onClick={() => setSelected(row)}
-                      className="border-b border-white/[0.04] hover:bg-white/[0.03]
+                      className="border-b border-white/[0.04] hover:bg-white/[0.025]
                                  transition-colors cursor-pointer group"
                     >
-                      <td className="px-4 py-3 text-slate-400 tabular-nums">{row.date}</td>
-                      <td className="px-4 py-3 text-slate-300 font-medium">{row.operator}</td>
-                      <td className="px-4 py-3 text-slate-400">{row.aircraft}</td>
-                      <td className="px-4 py-3 text-slate-400">{row.location}</td>
-                      <td className="px-4 py-3"><Badge label={row.severity} /></td>
-                      <td className="px-4 py-3 text-slate-400 tabular-nums text-right pr-6">
-                        {row.fatalities === 0
-                          ? <span className="text-emerald-500">0</span>
-                          : <span className="text-red-400">{row.fatalities.toLocaleString()}</span>
-                        }
+                      <td className="px-4 py-3 text-slate-500 tabular-nums whitespace-nowrap">
+                        {row.date}
                       </td>
-                      <td className="px-4 py-3 text-slate-400 tabular-nums">{row.aboard}</td>
-                      <td className="px-4 py-3 text-slate-500 max-w-[200px]">
-                        <p className="line-clamp-2 leading-relaxed">{row.summary}</p>
+                      <td className="px-4 py-3 text-slate-300 font-medium max-w-[160px] truncate">
+                        {row.operator}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500 max-w-[140px] truncate">
+                        {row.aircraft}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500 max-w-[140px] truncate">
+                        {row.location}
                       </td>
                       <td className="px-4 py-3">
-                        <ExternalLink
-                          size={12}
-                          className="text-slate-600 group-hover:text-slate-400 transition-colors"
-                        />
+                        <Badge label={row.severity} />
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {row.fatalities === 0
+                          ? <span className="text-emerald-600">0</span>
+                          : <span className="text-red-400 font-medium">
+                              {fmtCount(row.fatalities)}
+                            </span>
+                        }
+                      </td>
+                      <td className="px-4 py-3 text-right text-slate-500 tabular-nums">
+                        {fmtCount(row.aboard)}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 max-w-[220px]">
+                        <p className="line-clamp-2 leading-relaxed text-[11px]">
+                          {row.summary}
+                        </p>
                       </td>
                     </motion.tr>
                   ))}
                 </AnimatePresence>
 
-                {pageData.length === 0 && (
+                {rows.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-slate-600">
-                      No incidents match the current filters.
+                    <td colSpan={8} className="px-4 py-16 text-center">
+                      <p className="text-slate-600 text-sm">No incidents match the current filters.</p>
+                      <p className="text-slate-700 text-xs mt-1">Try adjusting your search or filter criteria.</p>
                     </td>
                   </tr>
                 )}
@@ -343,51 +354,58 @@ export default function Incidents() {
             </table>
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-3
-                            border-t border-white/[0.06] text-xs text-slate-500">
-              <span>
-                Page {page} of {totalPages} · {totalCount.toLocaleString()} total
+                            border-t border-white/[0.05] text-xs text-slate-600">
+              <span className="tabular-nums">
+                Page {page} of {totalPages}
               </span>
               <div className="flex gap-1 items-center">
-                {page > 1 && (
-                  <button
-                    onClick={() => setPage(p => p - 1)}
-                    aria-label="Previous page"
-                    className="px-2 py-1.5 rounded-md text-slate-500 hover:text-slate-300
-                               hover:bg-white/[0.04] transition-all
-                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                  >
-                    ‹
-                  </button>
-                )}
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  aria-label="Previous page"
+                  className={clsx(
+                    'p-1.5 rounded-md transition-all',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
+                    page === 1
+                      ? 'text-slate-800 cursor-not-allowed'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]',
+                  )}
+                >
+                  <ChevronLeft size={14} />
+                </button>
                 {pageNumbers().map(p => (
                   <button
                     key={p}
                     onClick={() => setPage(p)}
                     aria-current={page === p ? 'page' : undefined}
                     className={clsx(
-                      'w-7 h-7 rounded-md font-medium transition-all',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500',
+                      'w-7 h-7 rounded-md text-xs font-medium transition-all',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
                       page === p
-                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                        : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]',
+                        ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/25'
+                        : 'text-slate-600 hover:text-slate-400 hover:bg-white/[0.04]',
                     )}
                   >
                     {p}
                   </button>
                 ))}
-                {page < totalPages && (
-                  <button
-                    onClick={() => setPage(p => p + 1)}
-                    aria-label="Next page"
-                    className="px-2 py-1.5 rounded-md text-slate-500 hover:text-slate-300
-                               hover:bg-white/[0.04] transition-all
-                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
-                  >
-                    ›
-                  </button>
-                )}
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  aria-label="Next page"
+                  className={clsx(
+                    'p-1.5 rounded-md transition-all',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
+                    page === totalPages
+                      ? 'text-slate-800 cursor-not-allowed'
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]',
+                  )}
+                >
+                  <ChevronRight size={14} />
+                </button>
               </div>
             </div>
           )}

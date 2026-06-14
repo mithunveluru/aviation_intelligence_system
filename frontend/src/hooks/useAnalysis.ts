@@ -236,6 +236,34 @@ export function useIncidents(params: {
   });
 }
 
+export function useTopOperators(limit = 10) {
+  return useQuery({
+    queryKey: ['top-operators', limit],
+    queryFn: async () => {
+      const { data } = await api.get(endpoints.topOperators())
+      return (data.data ?? []).slice(0, limit).map((d: any) => ({
+        operator:   d.operator ?? d.operator_name ?? 'Unknown',
+        incidents:  d.incident_count ?? d.incidents ?? 0,
+        fatalities: d.total_fatalities ?? d.fatalities ?? 0,
+      }))
+    },
+  })
+}
+
+export function useTopAircraft(limit = 10) {
+  return useQuery({
+    queryKey: ['top-aircraft', limit],
+    queryFn: async () => {
+      const { data } = await api.get(endpoints.topAircraft())
+      return (data.data ?? []).slice(0, limit).map((d: any) => ({
+        aircraft:   d.aircraft_type ?? d.aircraft ?? 'Unknown',
+        incidents:  d.incident_count ?? d.incidents ?? 0,
+        fatalities: d.total_fatalities ?? d.fatalities ?? 0,
+      }))
+    },
+  })
+}
+
 export function useIncidentDetail(id: number | null) {
   return useQuery({
     queryKey: ['incident-detail', id],

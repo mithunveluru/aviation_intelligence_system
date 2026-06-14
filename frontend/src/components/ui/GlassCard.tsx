@@ -7,19 +7,23 @@ interface Props {
   hover?: boolean
   delay?: number
   onClick?: () => void
+  variant?: 'panel' | 'glass'
 }
 
-export default function GlassCard({ children, className, hover, delay = 0, onClick }: Props) {
+export default function GlassCard({
+  children, className, hover, delay = 0, onClick, variant = 'panel',
+}: Props) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay, ease: 'easeOut' }}
-      whileHover={hover ? { y: -2, boxShadow: '0 8px 32px rgba(0,0,0,0.55)' } : undefined}
+      transition={{ duration: 0.3, delay, ease: 'easeOut' }}
+      whileHover={hover ? { y: -2 } : undefined}
       onClick={onClick}
       className={clsx(
-        'glass rounded-xl',
-        hover && 'cursor-pointer transition-shadow duration-150',
+        variant === 'glass' ? 'glass' : 'panel',
+        'rounded-xl',
+        hover && 'cursor-pointer panel-hover',
         onClick && 'cursor-pointer',
         className,
       )}

@@ -1,6 +1,6 @@
 # Aviation Intelligence System — Project Context
 
-Last updated: 2026-06-12
+Last updated: 2026-06-14
 
 ---
 
@@ -214,6 +214,135 @@ frontend/src/
 - Added `tfidfVocabSize` to `useModelMetricsFull` return value
 - Fixed `vite.config.js` and `vite.config.ts` to match (Vite was loading stale .js)
 
+## Phase 9 — Premium UI/UX Redesign (2026-06-14)
+
+### Design System
+
+**New `src/utils/format.ts`** — centralized number formatting utility:
+- `fmtCount(n)` — integer with commas: 6841 → "6,841"
+- `fmtPct(n, dec)` — already-percentage (0–100 scale) → "60.3%"
+- `fmtRate(n, dec)` — 0–1 ratio as percentage: 0.83 → "83.0%"
+- `fmtDecimal(n, dec)` — fixed decimal places
+- `fmtCompact(n)` — large numbers compactly: 94293 → "94.3K"
+- `fmtTruncate(s, max)` — string truncation for display
+
+**`src/index.css`** redesigned with:
+- CSS custom properties for surface hierarchy (`--bg-base`, `--bg-raised`, `--bg-overlay`)
+- CSS custom properties for borders (`--border-dim/base/strong`)
+- New `.panel` class — clean elevated card (replaces heavy glass morphism for content cards)
+- New `.panel-hover` class — hover effect for interactive panels
+- `.glass` class kept for modals, tooltips, sidebar (needs backdrop-filter)
+- `.skeleton` class — shimmer animation for loading states
+- `.stat-value` utility — large tabular number typography
+- `.metric-label` utility — small uppercase label style
+- `.divider` utility — consistent border divider
+
+### Component Redesigns
+
+**`GlassCard.tsx`**: Added `variant="panel" | "glass"` prop. Default is now `panel` (cleaner borders, no blur). All page cards now use clean panels instead of glass morphism.
+
+**`StatCard.tsx`**: Major redesign:
+- Colored 2px top accent strip (replaces icon background box)
+- `text-3xl` stat value (was `text-2xl`)
+- Icon in corner at 40% opacity (not dominant)
+- `metric-label` / `stat-value` CSS utilities
+- Added `blue` and `violet` accent options
+- No GlassCard wrapper — uses `.panel` directly for better control
+
+**`PageHeader.tsx`**: Redesigned:
+- `text-2xl` title (was `text-xl`) with icon inline (no box)
+- Optional `children` slot for contextual actions (used in Model page for status badge)
+
+**`Badge.tsx`**: Improved opacity levels for cleaner look.
+
+**`Sidebar.tsx`**: Redesigned:
+- Logo: gradient cyan→blue pill with improved Plane icon
+- Brand name "Aviation Intel" + "Incident Analysis Platform" subtitle
+- Width reduced to 216px (was 220px)
+- Active nav: left-side cyan indicator bar + `bg-white/[0.07]` background (was right-side bar + cyan-colored text)
+- Nav icon: `text-cyan-400` only when active (was always styled)
+- Footer: dataset meta ("6,900+ incidents · 1908–2020") shown when expanded
+- ML stack info shown when expanded
+
+**`Layout.tsx`**: Uses `var(--bg-base)` CSS variable. Padding 24px → `p-6 lg:p-8`.
+
+**`AviationBg.tsx`**: Radar rings at 3.5% opacity (was 3%), larger radius scale.
+
+**`ErrorState.tsx`**: Redesigned with icon box, clearer typography hierarchy, `RefreshCw` icon on retry button.
+
+### Page Upgrades
+
+**`Overview.tsx`** — major upgrade:
+- 5 stat cards: use new StatCard design; "Clusters" stat replaced with "Unique Operators"
+- Fatal Rate uses `fmtPct` (was inline toFixed)
+- Model Accuracy uses `fmtRate` (was inline * 100 toFixed)
+- Added **Severity Breakdown** panel (right 1/3 of trend row): shows progress bars per severity with counts + percentages + survival rate/aircraft types/locations
+- Added **Top Operators** panel: horizontal Recharts bar chart (top 8 operators by incident count)
+- Added **Top Aircraft Types** panel: horizontal Recharts bar chart (top 8 aircraft)
+- Skeleton loader uses `.skeleton` shimmer class
+- Added `useTopOperators` and `useTopAircraft` hooks
+
+**`Clusters.tsx`** — improved:
+- Stats row: 3 columns (Incidents, Fatality Rate, Avg Fatal) with 1 decimal for avg
+- Color accent as left 1px border strip instead of dot
+- Recommendation section only shown when available
+- Confidence bar: color changes green/amber/red based on score
+- `fmtRate` for fatality rate, `fmtDecimal` for avg fatalities
+
+**`Analysis.tsx`** — improved:
+- `fmtCount` and `fmtPct` used in all tooltips and labels
+- UMAP: cluster labels in tooltip show from `clusterLabelMap`
+- UMAP: legend uses abbreviated "C1/C2" format
+- Decade chart: custom tooltip with formatted counts
+- Severity pie: shows count + percentage in legend
+- `space-y-5` layout for better breathing room
+- Reduced chart dot/stroke sizes for cleaner look
+
+**`Model.tsx`** — improved:
+- Metric pills use `.panel` + `stat-value` typography
+- Added descriptive sub-text to each metric pill
+- Added "Trained" status badge in PageHeader children slot
+- Confusion matrix uses `fmtCount` for cell values
+- Per-class bars: `fmtRate` for displayed values
+- Model info uses `fmtCount` for sample sizes
+
+**`Incidents.tsx`** — improved:
+- Filter bar padding reduced (p-3.5 vs p-4)
+- Chevron prev/next icons (ChevronLeft/Right) replace `‹›` characters
+- Disabled state for prev/next at boundaries
+- Empty state with two-line message
+- `fmtCount` on fatalities/aboard values
+- Modal: `fmtCount` for fatalities/aboard display
+- Summary column text-[11px]
+
+### New API Endpoints (client.ts)
+- `topOperators: () => /analysis/operators`
+- `topAircraft: () => /analysis/aircraft`
+
+### New Hooks (useAnalysis.ts)
+- `useTopOperators(limit = 10)` — top N operators by incident count
+- `useTopAircraft(limit = 10)` — top N aircraft types by incident count
+
+### UI Audit Findings (2026-06-14)
+
+| Issue | Resolution |
+|-------|-----------|
+| StatCards all identical visual treatment | Colored top-strip accent, larger values |
+| PageHeader icon-in-box on every page | Inline icon, bigger title, optional actions |
+| Glass morphism everywhere | Panel class for content cards, glass only for overlays |
+| Typography hierarchy too flat | text-3xl values, text-2xl titles, metric-label utility |
+| Overview too sparse (1 chart) | Added severity breakdown + operators + aircraft sections |
+| Numbers with inline .toFixed/.toLocaleString | Centralized via format.ts |
+| Sidebar branding weak | Gradient logo, product description, dataset meta |
+| Sidebar active state used cyan text | Clean white text + left indicator bar |
+| Confusion matrix cells: no formatting | fmtCount applied |
+| LoadingSkeleton plain divs | Shimmer animation via .skeleton class |
+| ErrorState plain icon + text | Icon box, cleaner hierarchy, proper retry button |
+| Per-class metrics show tiny % values | fmtRate shows clean percentage |
+| Clusters avg fatalities rounded to int | fmtDecimal(v, 1) shows one decimal |
+| UMAP tooltip missing cluster label | clusterLabelMap lookup added |
+| Incident modal showed raw .toFixed(0) | fmtCount for fatalities/aboard |
+
 ## Pending Work
 
 - [ ] Add CSV upload workflow UI (currently endpoint-only, no UI)
@@ -226,6 +355,7 @@ frontend/src/
 - [ ] Clean up root-level .db backup files (4 files, in git, ~5MB)
 - [ ] Update README to reflect XGBoost (not RandomForest)
 - [ ] Date sorting on incidents works alphabetically not chronologically (dates stored as strings)
+- [ ] Feature importances visualization (useFeatureImportances hook exists, no UI yet)
 
 ---
 

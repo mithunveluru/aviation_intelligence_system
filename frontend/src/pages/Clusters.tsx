@@ -1,39 +1,36 @@
-import { Network } from 'lucide-react'
+import { Network, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import GlassCard  from '../components/ui/GlassCard'
 import Badge      from '../components/ui/Badge'
 import PageHeader from '../components/ui/PageHeader'
 import ErrorState from '../components/ui/ErrorState'
 import { useClusters } from '../hooks/useAnalysis'
+import { fmtCount, fmtRate, fmtDecimal } from '../utils/format'
 
-// ─── Cluster accent colours (no colour field in API — derive from index) ──────
 const CLUSTER_COLORS = [
-  '#06b6d4', // cyan
-  '#0d9488', // teal
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ef4444', // red
-  '#10b981', // emerald
-  '#3b82f6', // blue
-  '#f97316', // orange
+  '#06b6d4', '#0d9488', '#f59e0b', '#8b5cf6',
+  '#ef4444', '#10b981', '#3b82f6', '#f97316',
 ]
 
 // ─── Confidence Bar ───────────────────────────────────────────────────────────
 function ConfidenceBar({ value }: { value: number }) {
+  const pct = Math.round(value * 100)
+  const color = pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444'
   return (
-    <div className="mt-3">
-      <div className="flex justify-between text-xs text-slate-500 mb-1">
-        <span>Model confidence</span>
-        <span className="text-slate-300 font-medium">
-          {(value * 100).toFixed(0)}%
+    <div>
+      <div className="flex justify-between items-center mb-1.5">
+        <span className="metric-label">LLM Confidence</span>
+        <span className="text-xs font-semibold tabular-nums" style={{ color }}>
+          {pct}%
         </span>
       </div>
-      <div className="h-1 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="h-1 bg-white/[0.05] rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: `${value * 100}%` }}
+          animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
-          className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-400"
+          className="h-full rounded-full"
+          style={{ background: color }}
         />
       </div>
     </div>
@@ -43,102 +40,87 @@ function ConfidenceBar({ value }: { value: number }) {
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-pulse">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-96 rounded-xl bg-white/5" />
+        <div key={i} className="h-96 rounded-xl skeleton" />
       ))}
     </div>
   )
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Clusters() {
   const { data: clusters, isLoading, isError } = useClusters()
 
-  // ─── States ─────────────────────────────────────────────────────────────────
   if (isLoading) return <LoadingSkeleton />
-
-  if (isError) return <ErrorState />
+  if (isError)   return <ErrorState />
 
   if (!clusters?.length) return (
-    <div className="flex flex-col items-center justify-center h-64 gap-2">
-      <Network className="text-slate-600" size={32} />
-      <p className="text-slate-500 text-sm">
+    <div className="flex flex-col items-center justify-center h-64 gap-3">
+      <Network className="text-slate-700" size={28} />
+      <p className="text-slate-500 text-sm text-center">
         No clusters found. Run the clustering pipeline first.
       </p>
     </div>
   )
 
-  // ─── Main Render ─────────────────────────────────────────────────────────────
+  const validClusters = clusters.filter((c: any) => c.clusterLabel !== -1)
+
   return (
     <div>
       <PageHeader
         icon={Network}
         title="Cluster Analysis"
-        subtitle="LLM-generated root cause summaries for each incident cluster"
-      />
+        subtitle="LLM-generated root cause summaries for each HDBSCAN incident cluster"
+      >
+        <span className="text-xs text-slate-600 tabular-nums">
+          {validClusters.length} cluster{validClusters.length !== 1 ? 's' : ''} detected
+        </span>
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {clusters.filter((c: any) => c.clusterLabel !== -1).map((c: any, i: number) => {
-          // ✅ Map API fields → UI variables
-          const color      = CLUSTER_COLORS[i % CLUSTER_COLORS.length]
-          const yearRange  = `${c.yearRangeStart ?? '?'}–${c.yearRangeEnd ?? '?'}`
-          const fatalityRate = c.avgFatalityRate ?? 0
-          const factors    = Array.isArray(c.keyContributingFactors)
-                               ? c.keyContributingFactors
-                               : []
-          const confidence = c.confidenceScore ?? 0
+        {validClusters.map((c: any, i: number) => {
+          const color   = CLUSTER_COLORS[i % CLUSTER_COLORS.length]
+          const factors = Array.isArray(c.keyContributingFactors) ? c.keyContributingFactors : []
 
           return (
-            <GlassCard
-              key={c.clusterId}
-              hover
-              delay={i * 0.08}
-              className="p-5"
-            >
+            <GlassCard key={c.clusterId} hover delay={i * 0.07} className="p-5">
+
               {/* Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2.5">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className="w-2 h-8 rounded-full flex-shrink-0"
+                    className="w-1 h-10 rounded-full flex-shrink-0"
                     style={{ background: color }}
                   />
-                  <div>
-                    {/* ✅ FIX: c.name → c.clusterLabel */}
-                    <h3 className="text-sm font-semibold text-slate-100">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-slate-100 truncate">
                       {c.clusterLabel ?? `Cluster ${c.clusterId}`}
                     </h3>
-                    {/* ✅ FIX: c.label → c.clusterId, c.count → c.incidentCount */}
-                    <p className="text-xs text-slate-500">
-                      Cluster {c.clusterId} · {(c.incidentCount ?? 0).toLocaleString()} incidents · {yearRange}
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      {fmtCount(c.incidentCount)} incidents
+                      {' · '}
+                      {c.yearRangeStart ?? '?'}–{c.yearRangeEnd ?? '?'}
                     </p>
                   </div>
                 </div>
                 <Badge label={c.dominantSeverity ?? 'Unknown'} />
               </div>
 
-              {/* Stats row */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
                 {[
-                  {
-                    label: 'Incidents',
-                    // ✅ FIX: c.count → c.incidentCount
-                    value: (c.incidentCount ?? 0).toLocaleString(),
-                  },
-                  {
-                    label: 'Fatality rate',
-                    // ✅ FIX: c.fatalityRate → c.avgFatalityRate
-                    value: `${(fatalityRate * 100).toFixed(0)}%`,
-                  },
+                  { label: 'Incidents',     value: fmtCount(c.incidentCount)          },
+                  { label: 'Fatality Rate', value: fmtRate(c.avgFatalityRate, 0)       },
+                  { label: 'Avg Fatal',     value: fmtDecimal(c.avgFatalities, 1)      },
                 ].map(({ label, value }) => (
                   <div
                     key={label}
-                    className="bg-white/[0.03] rounded-lg px-3 py-2 border border-white/[0.05]"
+                    className="rounded-lg px-3 py-2 border border-white/[0.05]"
+                    style={{ background: 'rgba(255,255,255,0.025)' }}
                   >
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">
-                      {label}
-                    </p>
-                    <p className="text-base font-bold text-slate-100 tabular-nums">
+                    <p className="metric-label mb-1">{label}</p>
+                    <p className="text-base font-bold text-slate-100 tabular-nums leading-none">
                       {value}
                     </p>
                   </div>
@@ -147,52 +129,48 @@ export default function Clusters() {
 
               {/* Root cause */}
               <div className="mb-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-1.5">
-                  Root Cause
-                </p>
-                {/* ✅ FIX: c.rootCause → c.rootCauseSummary */}
+                <p className="metric-label mb-1.5">Root Cause</p>
                 <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
                   {c.rootCauseSummary ?? 'No root cause summary available.'}
                 </p>
               </div>
 
               {/* Factors */}
-              <div className="mb-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-2">
-                  Key Signals
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {/* ✅ FIX: c.factors → c.keyContributingFactors (array-guarded) */}
-                  {factors.length > 0 ? (
-                    factors.map((f: string) => (
+              {factors.length > 0 && (
+                <div className="mb-4">
+                  <p className="metric-label mb-2">Key Signals</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {factors.map((f: string) => (
                       <span
                         key={f}
-                        className="text-[10px] px-2 py-0.5 rounded-md
-                                   bg-white/[0.04] border border-white/[0.06] text-slate-400"
+                        className="text-[11px] px-2 py-0.5 rounded-md
+                                   border border-white/[0.06] text-slate-400"
+                        style={{ background: 'rgba(255,255,255,0.035)' }}
                       >
                         {f}
                       </span>
-                    ))
-                  ) : (
-                    <span className="text-[10px] text-slate-600 italic">
-                      No factors available
-                    </span>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Recommendation */}
-              <div className="p-3 rounded-lg border border-teal-500/20 bg-teal-500/5 mb-3">
-                <p className="text-[10px] uppercase tracking-wider text-teal-500 mb-1">
-                  Recommended Action
-                </p>
-                <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">
-                  {c.recommendations ?? 'No recommendations available.'}
-                </p>
-              </div>
+              {c.recommendations && c.recommendations !== 'No recommendations yet.' && (
+                <div
+                  className="p-3 rounded-lg border border-teal-500/15 mb-4"
+                  style={{ background: 'rgba(13,148,136,0.05)' }}
+                >
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <AlertCircle size={11} className="text-teal-500 flex-shrink-0" />
+                    <p className="metric-label text-teal-500/80">Recommended Action</p>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
+                    {c.recommendations}
+                  </p>
+                </div>
+              )}
 
-              {/* ✅ FIX: c.confidence → c.confidenceScore */}
-              <ConfidenceBar value={confidence} />
+              <ConfidenceBar value={c.confidenceScore ?? 0} />
             </GlassCard>
           )
         })}

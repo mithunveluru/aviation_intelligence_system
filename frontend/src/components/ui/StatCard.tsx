@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'  
-
-import GlassCard from './GlassCard'
+import type { LucideIcon } from 'lucide-react'
 import clsx from 'clsx'
 
 interface Props {
@@ -9,32 +7,47 @@ interface Props {
   label: string
   value: string | number
   sub?: string
-  accent?: 'cyan' | 'teal' | 'amber' | 'red' | 'emerald'
+  accent?: 'cyan' | 'teal' | 'amber' | 'red' | 'emerald' | 'blue' | 'violet'
   delay?: number
 }
 
 const accentMap = {
-  cyan:    { icon: 'text-cyan-400',    glow: 'shadow-cyan-500/20',   bg: 'bg-cyan-500/10'    },
-  teal:    { icon: 'text-teal-400',    glow: 'shadow-teal-500/20',   bg: 'bg-teal-500/10'    },
-  amber:   { icon: 'text-amber-400',   glow: 'shadow-amber-500/20',  bg: 'bg-amber-500/10'   },
-  red:     { icon: 'text-red-400',     glow: 'shadow-red-500/20',    bg: 'bg-red-500/10'     },
-  emerald: { icon: 'text-emerald-400', glow: 'shadow-emerald-500/20',bg: 'bg-emerald-500/10' },
+  cyan:    { icon: 'text-cyan-400',    bar: 'bg-cyan-500'    },
+  teal:    { icon: 'text-teal-400',    bar: 'bg-teal-500'    },
+  amber:   { icon: 'text-amber-400',   bar: 'bg-amber-500'   },
+  red:     { icon: 'text-red-400',     bar: 'bg-red-500'     },
+  emerald: { icon: 'text-emerald-400', bar: 'bg-emerald-500' },
+  blue:    { icon: 'text-blue-400',    bar: 'bg-blue-500'    },
+  violet:  { icon: 'text-violet-400',  bar: 'bg-violet-500'  },
 }
 
-export default function StatCard({ icon: Icon, label, value, sub, accent = 'cyan', delay = 0 }: Props) {
+export default function StatCard({
+  icon: Icon, label, value, sub, accent = 'cyan', delay = 0,
+}: Props) {
   const a = accentMap[accent]
   return (
-    <GlassCard hover delay={delay} className="p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">{label}</p>
-          <p className="text-2xl font-bold text-slate-100 tabular-nums">{value}</p>
-          {sub && <p className="text-xs text-slate-500 mt-1">{sub}</p>}
-        </div>
-        <div className={clsx('p-2.5 rounded-lg', a.bg)}>
-          <Icon size={18} className={a.icon} strokeWidth={1.8} />
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, delay, ease: 'easeOut' }}
+      className="relative overflow-hidden panel rounded-xl p-5 panel-hover"
+    >
+      {/* Accent top strip */}
+      <div className={clsx('absolute top-0 left-0 right-0 h-[2px]', a.bar)} />
+
+      {/* Label row */}
+      <div className="flex items-center justify-between mb-3 mt-0.5">
+        <p className="metric-label">{label}</p>
+        <Icon size={14} className={clsx(a.icon, 'opacity-40')} strokeWidth={2} />
       </div>
-    </GlassCard>
+
+      {/* Value */}
+      <p className="stat-value">{value}</p>
+
+      {/* Sub */}
+      {sub && (
+        <p className="text-[11px] text-slate-600 mt-1.5 leading-none">{sub}</p>
+      )}
+    </motion.div>
   )
 }
