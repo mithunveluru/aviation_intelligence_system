@@ -415,5 +415,22 @@ VITE_API_URL=http://localhost:10000
 ## Known Deployment Notes
 
 - Backend on Render free tier: SQLite lives in `/app/data/`. Data lost on re-deploy unless a persistent disk is attached.
-- Frontend on Vercel: Static SPA with `vercel.json` configuring SPA routing rewrites.
+- Frontend on Vercel: Static SPA (Vite build → single `index.html`). `vercel.json` has two rewrites:
+  1. `/api/(.*)` → Render backend proxy (must be first)
+  2. `/(.*)` → `/index.html` (SPA catch-all fallback — fixes 404 on refresh)
 - CORS: Backend must have Vercel URL in `ALLOWED_ORIGINS` env var.
+
+## Production Bug Fixed (2026-06-14): 404 on Route Refresh
+
+**Root cause**: `vercel.json` had only the `/api/(.*)` proxy rewrite. When users refreshed or directly accessed `/clusters`, `/analysis`, `/model`, or `/incidents`, Vercel looked for static files at those paths (none exist in a Vite SPA build), returned `404 NOT_FOUND`.
+
+**Why `/` worked**: Vercel serves `index.html` automatically for the root. No rewrite needed.
+
+**Fix**: Added `{ "source": "/(.*)", "destination": "/index.html" }` as the second rewrite rule. Order is critical — API proxy must come first so `/api/*` routes are proxied to Render, not served as `index.html`.
+
+**All routes now refresh-safe**:
+- `/` — Overview
+- `/clusters` — Cluster Analysis
+- `/analysis` — Pattern Analysis
+- `/model` — Model Performance
+- `/incidents` — Incident Records
